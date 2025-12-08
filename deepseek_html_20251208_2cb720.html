@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orendog Video Screen - Запись экрана, камеры и скриншоты</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        :root {
+            --primary-orange: #FF6B35;
+            --dark-orange: #E55A2B;
+            --light-orange: #FF9E7D;
+            --bg-light: #FFF5F0;
+            --card-light: #FFFFFF;
+            --text-dark: #333333;
+            --text-light: #FFFFFF;
+            --shadow: rgba(255, 107, 53, 0.2);
+            --border-light: #EEE;
+        }
+
+        .dark-theme {
+            --primary-orange: #FF8B5C;
+            --dark-orange: #FF6B35;
+            --light-orange: #FFB89C;
+            --bg-light: #1A1A1A;
+            --card-light: #2D2D2D;
+            --text-dark: #F0F0F0;
+            --text-light: #FFFFFF;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --border-light: #444;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+            color: var(--text-light);
+            padding: 15px 0;
+            box-shadow: 0 4px 12px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle, .lang-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover, .lang-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .lang-selector {
+            position: relative;
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            min-width: 120px;
+            z-index: 10;
+        }
+
+        .lang-dropdown.show {
+            display: block;
+        }
+
+        .lang-option {
+            padding: 10px 15px;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .lang-option:hover {
+            background: #f5f5f5;
+        }
+
+        .lang-option.active {
+            background: var(--primary-orange);
+            color: white;
+        }
+
+        .dark-theme .lang-dropdown {
+            background: var(--card-light);
+        }
+
+        .dark-theme .lang-option {
+            color: var(--text-dark);
+        }
+
+        .dark-theme .lang-option:hover {
+            background: #444;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .boosty-btn {
+            background: linear-gradient(135deg, #8A2BE2, #6A0DAD);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(138, 43, 226, 0.3);
+            transition: all 0.3s;
+        }
+
+        .boosty-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(138, 43, 226, 0.4);
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 12px 25px;
+            background: var(--card-light);
+            border: 2px solid var(--primary-orange);
+            border-radius: 10px;
+            color: var(--primary-orange);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: var(--primary-orange);
+            color: white;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .controls-section {
+            background-color: var(--card-light);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px var(--shadow);
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid var(--border-light);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--primary-orange);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            font-size: 1.6rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 16px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-orange);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-orange);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px var(--shadow);
+        }
+
+        .btn-secondary {
+            background-color: var(--card-light);
+            color: var(--primary-orange);
+            border: 2px solid var(--primary-orange);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-light);
+            transform: translateY(-3px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn i {
+            font-size: 1.3rem;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+            background-color: rgba(255, 107, 53, 0.1);
+            color: var(--dark-orange);
+            border-left: 4px solid var(--primary-orange);
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.recording {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 107, 53, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
+        }
+
+        .preview-section {
+            background-color: var(--card-light);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px var(--shadow);
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid var(--border-light);
+        }
+
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .preview-area {
+            width: 100%;
+            min-height: 300px;
+            border-radius: 12px;
+            background-color: var(--bg-light);
+            border: 2px dashed var(--light-orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .preview-area img, .preview-area video {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .placeholder-text {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+
+        .placeholder-text i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--light-orange);
+        }
+
+        .camera-preview {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            background-color: #000;
+            overflow: hidden;
+            display: none;
+        }
+
+        .camera-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-preview.show {
+            display: block;
+        }
+
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+        }
+
+        .download-btn:hover {
+            background-color: #3d8b40;
+            transform: translateY(-3px);
+        }
+
+        .download-btn.hidden {
+            display: none;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 30px 0;
+            margin-top: 40px;
+        }
+
+        .dark-theme footer {
+            background-color: #222;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .footer-logo i {
+            color: var(--primary-orange);
+        }
+
+        .footer-text {
+            text-align: center;
+            max-width: 600px;
+            opacity: 0.8;
+        }
+
+        /* Media queries */
+        @media (max-width: 768px) {
+            .header-top {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <header>
+        <div class="container">
+            <div class="header-top">
+                <div class="controls-right">
+                    <button class="theme-toggle" id="themeToggle" title="Сменить тему">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="lang-selector">
+                        <button class="lang-toggle" id="langToggle" title="Сменить язык">
+                            <i class="fas fa-globe"></i>
+                        </button>
+                        <div class="lang-dropdown" id="langDropdown">
+                            <div class="lang-option active" data-lang="ru">
+                                <i class="fas fa-language"></i> Русский
+                            </div>
+                            <div class="lang-option" data-lang="en">
+                                <i class="fas fa-language"></i> English
+                            </div>
+                            <div class="lang-option" data-lang="zh">
+                                <i class="fas fa-language"></i> 中文
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="https://boosty.to/orengdog/donate" target="_blank" class="boosty-btn">
+                    <i class="fas fa-heart"></i> Поддержать автора
+                </a>
+            </div>
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1 id="siteTitle">Orendog Video Screen</h1>
+                        <p id="siteSubtitle">Запись экрана, камеры и создание скриншотов</p>
+                    </div>
+                </div>
+                <div class="tagline">
+                    <p><i class="fas fa-lightbulb"></i> <span id="taglineText">Простой и полезный инструмент для работы с экраном и камерой</span></p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="screen">
+                    <i class="fas fa-desktop"></i> <span id="modeScreen">Запись экрана</span>
+                </button>
+                <button class="mode-btn" data-mode="camera">
+                    <i class="fas fa-camera"></i> <span id="modeCamera">Запись с камеры</span>
+                </button>
+                <button class="mode-btn" data-mode="screenshot">
+                    <i class="fas fa-camera-retro"></i> <span id="modeScreenshot">Скриншот/Фото</span>
+                </button>
+            </div>
+
+            <div class="controls-section">
+                <h2 class="section-title"><i class="fas fa-sliders-h"></i> <span id="controlsTitle">Управление записью</span></h2>
+                <div class="controls">
+                    <button id="startRecording" class="btn btn-primary">
+                        <i class="fas fa-video"></i> <span id="startRecordingText">Начать запись</span>
+                    </button>
+                    <button id="stopRecording" class="btn btn-secondary" disabled>
+                        <i class="fas fa-stop"></i> <span id="stopRecordingText">Остановить запись</span>
+                    </button>
+                    <button id="captureBtn" class="btn btn-primary">
+                        <i class="fas fa-camera"></i> <span id="captureBtnText">Сделать снимок</span>
+                    </button>
+                </div>
+                <div id="status" class="status"></div>
+                
+                <div class="camera-preview" id="cameraPreview">
+                    <video id="cameraFeed" autoplay playsinline></video>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h2 class="section-title"><i class="fas fa-image"></i> <span id="previewTitle">Предпросмотр</span></h2>
+                <div class="preview-container">
+                    <div class="preview-area" id="previewArea">
+                        <div class="placeholder-text">
+                            <i class="fas fa-photo-video"></i>
+                            <p id="placeholderText1">Здесь будет отображаться записанное видео, фото или скриншот</p>
+                            <p id="placeholderText2">Начните запись или сделайте снимок, чтобы увидеть результат</p>
+                        </div>
+                    </div>
+                    <a id="downloadBtn" class="download-btn hidden">
+                        <i class="fas fa-download"></i> <span id="downloadBtnText">Скачать</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-video"></i>
+                    <span>Orendog Video Screen</span>
+                </div>
+                <div class="footer-text">
+                    <p id="footerText1">Удобный и бесплатный инструмент для записи экрана, камеры и создания скриншотов. Все действия выполняются непосредственно в вашем браузере.</p>
+                    <p id="footerText2">© 2023 Orendog Video Screen. Все права защищены.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Элементы DOM
+        const themeToggle = document.getElementById('themeToggle');
+        const langToggle = document.getElementById('langToggle');
+        const langDropdown = document.getElementById('langDropdown');
+        const startRecordingBtn = document.getElementById('startRecording');
+        const stopRecordingBtn = document.getElementById('stopRecording');
+        const captureBtn = document.getElementById('captureBtn');
+        const statusDiv = document.getElementById('status');
+        const previewArea = document.getElementById('previewArea');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const cameraFeed = document.getElementById('cameraFeed');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        
+        // Переменные для записи
+        let mediaRecorder;
+        let recordedChunks = [];
+        let recordingStream;
+        let isRecording = false;
+        let currentMode = 'screen'; // screen, camera, screenshot
+        let currentLang = 'ru';
+        
+        // Переводы
+        const translations = {
+            ru: {
+                siteTitle: "Orendog Video Screen",
+                siteSubtitle: "Запись экрана, камеры и создание скриншотов",
+                taglineText: "Простой и полезный инструмент для работы с экраном и камерой",
+                modeScreen: "Запись экрана",
+                modeCamera: "Запись с камеры",
+                modeScreenshot: "Скриншот/Фото",
+                controlsTitle: "Управление записью",
+                startRecordingText: "Начать запись",
+                stopRecordingText: "Остановить запись",
+                captureBtnText: "Сделать снимок",
+                previewTitle: "Предпросмотр",
+                placeholderText1: "Здесь будет отображаться записанное видео, фото или скриншот",
+                placeholderText2: "Начните запись или сделайте снимок, чтобы увидеть результат",
+                downloadBtnText: "Скачать",
+                footerText1: "Удобный и бесплатный инструмент для записи экрана, камеры и создания скриншотов. Все действия выполняются непосредственно в вашем браузере.",
+                footerText2: "© 2023 Orendog Video Screen. Все права защищены.",
+                recordingStatus: "Идет запись... Остановите запись, когда закончите.",
+                recordingComplete: "Запись завершена и готова к скачиванию",
+                screenshotComplete: "Снимок создан и готов к скачиванию",
+                cameraActive: "Камера активна. Нажмите 'Сделать снимок' для фото или 'Начать запись' для видео.",
+                errorRecording: "Ошибка при записи: ",
+                errorScreenshot: "Ошибка при создании снимка: ",
+                errorCamera: "Ошибка доступа к камере: ",
+                noSupport: "Ваш браузер не поддерживает запись экрана. Пожалуйста, используйте Chrome, Edge или Firefox."
+            },
+            en: {
+                siteTitle: "Orendog Video Screen",
+                siteSubtitle: "Screen recording, camera recording and screenshots",
+                taglineText: "Simple and useful tool for working with screen and camera",
+                modeScreen: "Screen Recording",
+                modeCamera: "Camera Recording",
+                modeScreenshot: "Screenshot/Photo",
+                controlsTitle: "Recording Control",
+                startRecordingText: "Start Recording",
+                stopRecordingText: "Stop Recording",
+                captureBtnText: "Capture Image",
+                previewTitle: "Preview",
+                placeholderText1: "Recorded video, photo or screenshot will be displayed here",
+                placeholderText2: "Start recording or capture an image to see the result",
+                downloadBtnText: "Download",
+                footerText1: "Convenient and free tool for screen recording, camera recording and screenshots. All actions are performed directly in your browser.",
+                footerText2: "© 2023 Orendog Video Screen. All rights reserved.",
+                recordingStatus: "Recording in progress... Stop recording when finished.",
+                recordingComplete: "Recording completed and ready to download",
+                screenshotComplete: "Image captured and ready to download",
+                cameraActive: "Camera active. Click 'Capture Image' for photo or 'Start Recording' for video.",
+                errorRecording: "Error recording: ",
+                errorScreenshot: "Error capturing image: ",
+                errorCamera: "Error accessing camera: ",
+                noSupport: "Your browser does not support screen recording. Please use Chrome, Edge or Firefox."
+            },
+            zh: {
+                siteTitle: "Orendog 视频屏幕",
+                siteSubtitle: "屏幕录制、摄像头录制和截图",
+                taglineText: "简单实用的屏幕和摄像头工作工具",
+                modeScreen: "屏幕录制",
+                modeCamera: "摄像头录制",
+                modeScreenshot: "截图/拍照",
+                controlsTitle: "录制控制",
+                startRecordingText: "开始录制",
+                stopRecordingText: "停止录制",
+                captureBtnText: "捕获图像",
+                previewTitle: "预览",
+                placeholderText1: "录制的视频、照片或截图将显示在这里",
+                placeholderText2: "开始录制或捕获图像以查看结果",
+                downloadBtnText: "下载",
+                footerText1: "方便免费的屏幕录制、摄像头录制和截图工具。所有操作都在浏览器中直接执行。",
+                footerText2: "© 2023 Orendog Video Screen。保留所有权利。",
+                recordingStatus: "录制进行中...完成后停止录制。",
+                recordingComplete: "录制完成并准备下载",
+                screenshotComplete: "图像已捕获并准备下载",
+                cameraActive: "摄像头已激活。点击'捕获图像'拍照或'开始录制'录视频。",
+                errorRecording: "录制错误：",
+                errorScreenshot: "捕获图像错误：",
+                errorCamera: "访问摄像头错误：",
+                noSupport: "您的浏览器不支持屏幕录制。请使用Chrome、Edge或Firefox。"
+            }
+        };
+        
+        // Переключение темы
+        themeToggle.addEventListener('click', () => {
+            const body = document.body;
+            const icon = themeToggle.querySelector('i');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                themeToggle.title = "Включить темную тему";
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                themeToggle.title = "Включить светлую тему";
+            }
+        });
+        
+        // Переключение языка
+        langToggle.addEventListener('click', () => {
+            langDropdown.classList.toggle('show');
+        });
+        
+        // Выбор языка
+        document.querySelectorAll('.lang-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const lang = option.getAttribute('data-lang');
+                setLanguage(lang);
+                
+                // Обновить активный класс
+                document.querySelectorAll('.lang-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                option.classList.add('active');
+                
+                // Скрыть dropdown
+                langDropdown.classList.remove('show');
+            });
+        });
+        
+        // Установка языка
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            
+            // Обновить все текстовые элементы
+            document.getElementById('siteTitle').textContent = t.siteTitle;
+            document.getElementById('siteSubtitle').textContent = t.siteSubtitle;
+            document.getElementById('taglineText').textContent = t.taglineText;
+            document.getElementById('modeScreen').textContent = t.modeScreen;
+            document.getElementById('modeCamera').textContent = t.modeCamera;
+            document.getElementById('modeScreenshot').textContent = t.modeScreenshot;
+            document.getElementById('controlsTitle').textContent = t.controlsTitle;
+            document.getElementById('startRecordingText').textContent = t.startRecordingText;
+            document.getElementById('stopRecordingText').textContent = t.stopRecordingText;
+            document.getElementById('captureBtnText').textContent = t.captureBtnText;
+            document.getElementById('previewTitle').textContent = t.previewTitle;
+            document.getElementById('placeholderText1').textContent = t.placeholderText1;
+            document.getElementById('placeholderText2').textContent = t.placeholderText2;
+            document.getElementById('downloadBtnText').textContent = t.downloadBtnText;
+            document.getElementById('footerText1').textContent = t.footerText1;
+            document.getElementById('footerText2').textContent = t.footerText2;
+            
+            // Обновить заголовок страницы
+            document.title = t.siteTitle;
+        }
+        
+        // Переключение режимов
+        modeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const mode = button.getAttribute('data-mode');
+                
+                // Обновить активную кнопку
+                modeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Остановить текущую запись, если есть
+                if (isRecording && mediaRecorder) {
+                    mediaRecorder.stop();
+                    stopCamera();
+                }
+                
+                // Очистить превью
+                previewArea.innerHTML = `
+                    <div class="placeholder-text">
+                        <i class="fas fa-photo-video"></i>
+                        <p id="placeholderText1">${translations[currentLang].placeholderText1}</p>
+                        <p id="placeholderText2">${translations[currentLang].placeholderText2}</p>
+                    </div>
+                `;
+                downloadBtn.classList.add('hidden');
+                
+                // Установить новый режим
+                currentMode = mode;
+                
+                // Обновить UI в зависимости от режима
+                if (mode === 'camera') {
+                    // Запустить камеру для предпросмотра
+                    startCameraPreview();
+                    captureBtn.style.display = 'flex';
+                    startRecordingBtn.style.display = 'flex';
+                } else if (mode === 'screenshot') {
+                    // Режим скриншота
+                    if (mode === 'screenshot' && currentMode !== 'camera') {
+                        captureBtn.textContent = currentLang === 'ru' ? 'Сделать скриншот' : 
+                                               currentLang === 'en' ? 'Take Screenshot' : '截图';
+                    }
+                    stopCamera();
+                    captureBtn.style.display = 'flex';
+                    startRecordingBtn.style.display = 'none';
+                } else {
+                    // Режим записи экрана
+                    stopCamera();
+                    captureBtn.style.display = 'none';
+                    startRecordingBtn.style.display = 'flex';
+                }
+                
+                statusDiv.textContent = '';
+                statusDiv.classList.remove('show');
+            });
+        });
+        
+        // Запуск предпросмотра камеры
+        async function startCameraPreview() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 1280, height: 720 },
+                    audio: true 
+                });
+                cameraFeed.srcObject = stream;
+                cameraPreview.classList.add('show');
+                statusDiv.textContent = translations[currentLang].cameraActive;
+                statusDiv.classList.add('show');
+            } catch (error) {
+                console.error('Ошибка доступа к камере:', error);
+                statusDiv.textContent = translations[currentLang].errorCamera + error.message;
+                statusDiv.classList.add('show');
+            }
+        }
+        
+        // Остановка камеры
+        function stopCamera() {
+            if (cameraFeed.srcObject) {
+                cameraFeed.srcObject.getTracks().forEach(track => track.stop());
+                cameraFeed.srcObject = null;
+                cameraPreview.classList.remove('show');
+            }
+        }
+        
+        // Начать запись
+        startRecordingBtn.addEventListener('click', async () => {
+            try {
+                if (currentMode === 'screen') {
+                    // Запись экрана
+                    recordingStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { mediaSource: "screen", width: 1920, height: 1080 },
+                        audio: true
+                    });
+                } else if (currentMode === 'camera') {
+                    // Запись с камеры
+                    recordingStream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 1280, height: 720 },
+                        audio: true
+                    });
+                }
+                
+                // Создание MediaRecorder
+                mediaRecorder = new MediaRecorder(recordingStream, {
+                    mimeType: 'video/webm;codecs=vp9,opus'
+                });
+                
+                // Сбор данных записи
+                recordedChunks = [];
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                // Когда запись остановлена
+                mediaRecorder.onstop = () => {
+                    // Создание blob из записанных данных
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Отображение видео
+                    previewArea.innerHTML = `
+                        <video controls autoplay>
+                            <source src="${url}" type="video/webm">
+                            ${translations[currentLang].noSupport}
+                        </video>
+                    `;
+                    
+                    // Настройка кнопки загрузки
+                    const timestamp = new Date().getTime();
+                    const modeName = currentMode === 'screen' ? 'screen' : 'camera';
+                    downloadBtn.href = url;
+                    downloadBtn.download = `orendog-${modeName}-recording-${timestamp}.webm`;
+                    downloadBtn.classList.remove('hidden');
+                    
+                    // Обновление статуса
+                    statusDiv.textContent = translations[currentLang].recordingComplete;
+                    statusDiv.classList.remove('recording');
+                    
+                    // Очистка данных
+                    recordedChunks = [];
+                    isRecording = false;
+                    
+                    // Освобождение потока
+                    recordingStream.getTracks().forEach(track => track.stop());
+                    
+                    // Обновление UI
+                    startRecordingBtn.disabled = false;
+                    stopRecordingBtn.disabled = true;
+                };
+                
+                // Начало записи
+                mediaRecorder.start();
+                isRecording = true;
+                
+                // Обновление UI
+                startRecordingBtn.disabled = true;
+                stopRecordingBtn.disabled = false;
+                statusDiv.textContent = translations[currentLang].recordingStatus;
+                statusDiv.classList.add('show', 'recording');
+                
+                // Очистка предыдущего превью
+                previewArea.innerHTML = '';
+                downloadBtn.classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Ошибка при записи:', error);
+                statusDiv.textContent = translations[currentLang].errorRecording + error.message;
+                statusDiv.classList.add('show');
+                startRecordingBtn.disabled = false;
+            }
+        });
+        
+        // Остановить запись
+        stopRecordingBtn.addEventListener('click', () => {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                startRecordingBtn.disabled = false;
+                stopRecordingBtn.disabled = true;
+            }
+        });
+        
+        // Сделать снимок (скриншот или фото с камеры)
+        captureBtn.addEventListener('click', async () => {
+            try {
+                if (currentMode === 'screenshot') {
+                    // Сделать скриншот экрана
+                    const stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { mediaSource: "screen" }
+                    });
+                    
+                    const track = stream.getVideoTracks()[0];
+                    const imageCapture = new ImageCapture(track);
+                    const bitmap = await imageCapture.grabFrame();
+                    
+                    // Создание canvas для преобразования
+                    const canvas = document.createElement('canvas');
+                    canvas.width = bitmap.width;
+                    canvas.height = bitmap.height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(bitmap, 0, 0);
+                    
+                    // Преобразование в blob и отображение
+                    canvas.toBlob((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        
+                        // Отображение скриншота
+                        previewArea.innerHTML = `<img src="${url}" alt="Скриншот экрана">`;
+                        
+                        // Настройка кнопки загрузки
+                        downloadBtn.href = url;
+                        downloadBtn.download = `orendog-screenshot-${new Date().getTime()}.png`;
+                        downloadBtn.classList.remove('hidden');
+                        
+                        // Обновление статуса
+                        statusDiv.textContent = translations[currentLang].screenshotComplete;
+                        statusDiv.classList.add('show');
+                        
+                        // Освобождение потока
+                        track.stop();
+                    }, 'image/png');
+                    
+                } else if (currentMode === 'camera') {
+                    // Сделать фото с камеры
+                    if (!cameraFeed.srcObject) {
+                        await startCameraPreview();
+                    }
+                    
+                    // Создание canvas из видео камеры
+                    const canvas = document.createElement('canvas');
+                    canvas.width = cameraFeed.videoWidth;
+                    canvas.height = cameraFeed.videoHeight;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
+                    
+                    // Преобразование в blob и отображение
+                    canvas.toBlob((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        
+                        // Отображение фото
+                        previewArea.innerHTML = `<img src="${url}" alt="Фото с камеры">`;
+                        
+                        // Настройка кнопки загрузки
+                        downloadBtn.href = url;
+                        downloadBtn.download = `orendog-photo-${new Date().getTime()}.png`;
+                        downloadBtn.classList.remove('hidden');
+                        
+                        // Обновление статуса
+                        statusDiv.textContent = translations[currentLang].screenshotComplete;
+                        statusDiv.classList.add('show');
+                    }, 'image/png');
+                }
+                
+            } catch (error) {
+                console.error('Ошибка при создании снимка:', error);
+                statusDiv.textContent = translations[currentLang].errorScreenshot + error.message;
+                statusDiv.classList.add('show');
+            }
+        });
+        
+        // Информация о поддержке браузером
+        window.addEventListener('load', () => {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                statusDiv.textContent = translations[currentLang].noSupport;
+                statusDiv.classList.add('show');
+                startRecordingBtn.disabled = true;
+                captureBtn.disabled = true;
+            }
+            
+            // Установить язык по умолчанию на основе браузера
+            const browserLang = navigator.language.substring(0, 2);
+            if (translations[browserLang]) {
+                setLanguage(browserLang);
+                document.querySelectorAll('.lang-option').forEach(opt => {
+                    opt.classList.remove('active');
+                    if (opt.getAttribute('data-lang') === browserLang) {
+                        opt.classList.add('active');
+                    }
+                });
+            }
+        });
+        
+        // Закрыть dropdown языка при клике вне его
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.lang-selector')) {
+                langDropdown.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
